@@ -13,7 +13,11 @@ const swap = async () => {
    */
   const raydiumSwap = new RaydiumSwap(process.env.RPC_URL, process.env.WALLET_PRIVATE_KEY);
   console.log(`Raydium swap initialized`);
-  console.log(`Swapping ${swapConfig.tokenAAmount} of ${swapConfig.tokenAAddress} for ${swapConfig.tokenBAddress}...`)
+  if(swapConfig.tokenBAmount){
+    console.log(`Swapping X amount of ${swapConfig.tokenAAddress} for ${swapConfig.tokenBAmount} of ${swapConfig.tokenBAddress}`)
+  } else {
+    console.log(`Swapping ${swapConfig.tokenAAmount} of ${swapConfig.tokenAAddress} for ${swapConfig.tokenBAddress}...`)
+  }
 
   /**
    * Load pool keys from the Raydium API to enable finding pool information.
@@ -35,15 +39,25 @@ const swap = async () => {
   /**
    * Prepare the swap transaction with the given parameters.
    */
-  const tx = await raydiumSwap.getSwapTransaction(
+  // const tx = await raydiumSwap.getSwapTransaction(
+  //   swapConfig.tokenBAddress,
+  //   swapConfig.tokenAAmount,
+  //   swapConfig.slippage,
+  //   poolInfo,
+  //   swapConfig.maxLamports, 
+  //   swapConfig.useVersionedTransaction,
+  //   swapConfig.direction
+  // );
+
+  const tx = await raydiumSwap.getSwapOutTransaction(
     swapConfig.tokenBAddress,
-    swapConfig.tokenAAmount,
+    swapConfig.tokenBAmount,
+    swapConfig.slippage,
     poolInfo,
     swapConfig.maxLamports, 
     swapConfig.useVersionedTransaction,
-    swapConfig.direction
+    swapConfig.direction // not used
   );
-
   /**
    * Depending on the configuration, execute or simulate the swap.
    */
@@ -66,6 +80,7 @@ const swap = async () => {
       : await raydiumSwap.simulateLegacyTransaction(tx as Transaction);
 
     console.log(simRes);
+    console.log("simRes.value.err", simRes.value.err)
   }
 };
 
