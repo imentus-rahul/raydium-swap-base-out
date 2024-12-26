@@ -13,7 +13,7 @@ const swap = async () => {
    */
   const raydiumSwap = new RaydiumSwap(process.env.RPC_URL, process.env.WALLET_PRIVATE_KEY);
   console.log(`Raydium swap initialized`);
-  if(swapConfig.tokenBAmount){
+  if (swapConfig.tokenBAmount) {
     console.log(`Swapping X amount of ${swapConfig.tokenAAddress} for ${swapConfig.tokenBAmount} of ${swapConfig.tokenBAddress}`)
   } else {
     console.log(`Swapping ${swapConfig.tokenAAmount} of ${swapConfig.tokenAAddress} for ${swapConfig.tokenBAddress}...`)
@@ -39,25 +39,40 @@ const swap = async () => {
   /**
    * Prepare the swap transaction with the given parameters.
    */
-  // const tx = await raydiumSwap.getSwapTransaction(
-  //   swapConfig.tokenBAddress,
-  //   swapConfig.tokenAAmount,
-  //   swapConfig.slippage,
-  //   poolInfo,
-  //   swapConfig.maxLamports, 
-  //   swapConfig.useVersionedTransaction,
-  //   swapConfig.direction
-  // );
-
-  const tx = await raydiumSwap.getSwapOutTransaction(
+  const tx = await raydiumSwap.getSwapTransaction(
     swapConfig.tokenBAddress,
-    swapConfig.tokenBAmount,
+    swapConfig.tokenAAmount,
     swapConfig.slippage,
     poolInfo,
     swapConfig.maxLamports, 
     swapConfig.useVersionedTransaction,
-    swapConfig.direction // not used
+    swapConfig.direction
   );
+
+  // const tx = await raydiumSwap.getSwapInTransactionViaTradeAPI(
+  //   swapConfig.tokenBAddress,
+  //   swapConfig.tokenAAmount,
+  //   swapConfig.slippage,
+  //   poolInfo,
+  //   swapConfig.maxLamports,
+  //   swapConfig.useVersionedTransaction,
+  //   swapConfig.direction
+  // );
+
+
+
+  // const tx = await raydiumSwap.getSwapOutTransaction(
+  //   swapConfig.tokenBAddress,
+  //   swapConfig.tokenBAmount,
+  //   swapConfig.slippage,
+  //   poolInfo,
+  //   swapConfig.maxLamports,
+  //   swapConfig.useVersionedTransaction,
+  //   swapConfig.direction // not used
+  // );
+
+
+  // const tx = await raydiumSwap.convertToWrapSol(swapConfig.tokenAAmount)
   /**
    * Depending on the configuration, execute or simulate the swap.
    */

@@ -1,4 +1,4 @@
-import { Connection, PublicKey, Keypair, Transaction, VersionedTransaction, TransactionMessage, SystemProgram, ComputeBudgetProgram } from '@solana/web3.js'
+import { Connection, PublicKey, Keypair, Transaction, VersionedTransaction, TransactionMessage, SystemProgram, ComputeBudgetProgram, LAMPORTS_PER_SOL } from '@solana/web3.js'
 import {
   Liquidity,
   LiquidityPoolKeys,
@@ -48,7 +48,8 @@ class RaydiumSwap {
       const liquidityJsonResp = await fetch(liquidityFile);
       if (!liquidityJsonResp.ok) return;
       liquidityJson = await liquidityJsonResp.json();
-    } else {
+    }
+    else {
       liquidityJson = JSON.parse(fs.readFileSync(path.join(__dirname, liquidityFile), 'utf-8'));
     }
     const allPoolKeysJson = [...(liquidityJson?.official ?? []), ...(liquidityJson?.unOfficial ?? [])]
@@ -359,8 +360,8 @@ class RaydiumSwap {
     console.log("Max Amount In: ", maxAmountIn.toExact())
     console.log("Amount In: ", amountIn.toExact())
     console.log("Amount Out: ", amountOut.toExact())
-    console.log("Current Price: ", currentPrice.raw)
-    console.log("Execution Price: ", executionPrice.raw)
+    console.log("Current Price: ", currentPrice.toFixed())
+    console.log("Execution Price: ", executionPrice.toFixed())
     console.log("Price Impact: ", priceImpact)
 
 
@@ -488,6 +489,43 @@ class RaydiumSwap {
   }
 
 
+  async getSwapInTransactionViaTradeAPI(poolKeys: LiquidityPoolKeys, amount: number, slippageX: number) {
+
+    
+
+  }
+
+  async convertToWrapSol(amount: number): Promise<Transaction | VersionedTransaction> {
+
+    let recentBlockhashForWrapSol = await this.connection.getLatestBlockhash()
+
+    let tokenInUserATA = await getAssociatedTokenAddress(
+      NATIVE_MINT,
+      this.wallet.publicKey
+    );
+
+    let legacyTransaction = new Transaction({
+      blockhash: recentBlockhashForWrapSol.blockhash,
+      lastValidBlockHeight: recentBlockhashForWrapSol.lastValidBlockHeight,
+      feePayer: this.wallet.publicKey,
+    })
+
+    legacyTransaction.add(
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 744_452 }),
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 183_504 }),
+    )
+
+    legacyTransaction.add(
+      SystemProgram.transfer({
+        fromPubkey: this.wallet.publicKey,
+        toPubkey: tokenInUserATA,
+        lamports: amount * LAMPORTS_PER_SOL,
+      }),
+      createSyncNativeInstruction(tokenInUserATA, TOKEN_PROGRAM_ID)
+    )
+
+    return legacyTransaction
+  }
 
 }
 
